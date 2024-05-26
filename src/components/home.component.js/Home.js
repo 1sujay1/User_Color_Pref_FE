@@ -22,6 +22,7 @@ const Home = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [signInLoading, setSignInLoading] = useState(false);
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -67,6 +68,7 @@ const Home = () => {
     e.preventDefault();
     try {
       //API call
+      setSignInLoading(true);
       const axiosResp = await axios.post(`${API_BASE_URL}/signIn`, {
         username,
         password,
@@ -76,6 +78,7 @@ const Home = () => {
       console.log("cookieValue", cookieValue);
       let data = axiosResp.data;
       if (data && data.status == 200) {
+        setSignInLoading(false);
         const { preference, token, username } = data.data;
 
         toast.success("Login, Success");
@@ -86,9 +89,11 @@ const Home = () => {
       } else {
         const errorText = data.message;
         setError(errorText);
+        setSignInLoading(false);
       }
     } catch (error) {
       setError(error.message);
+      setSignInLoading(false);
     }
   };
 
@@ -131,7 +136,9 @@ const Home = () => {
               />
             </div>
             {error && <p style={{ color: "red" }}>{error}</p>}
-            <button type="submit">Sign In</button>
+            <button type="submit" disabled={signInLoading}>
+              {signInLoading ? "Please wait..." : "Sign In"}
+            </button>
           </div>
         )}
         <hr />
