@@ -59,7 +59,7 @@ const Home = () => {
       );
 
       if (data && data.status == 200) {
-        return toast.success(`User ${username}, created successfully`);
+        return toast.success(`User ${userName}, created successfully`);
       } else {
         return toast.error(data.message);
       }
