@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setColor, setName, setToken } from "./../../redux/actions";
 import "./home.css";
@@ -6,26 +6,30 @@ import axios from "axios";
 import Cookies from "universal-cookie";
 import toast from "react-hot-toast";
 import { API_BASE_URL } from "../../environment";
-
-const colorTemp = {
-  "#ffffff": "White",
-  "#ff0000": "Red",
-  "#00ff00": "Green",
-  "#0000ff": "Blue",
-  "#ffff00": "Yellow",
-};
+import { colorTemp } from "../../config/config";
 
 const Home = () => {
   const color = useSelector((state) => state.color.value);
   const { name, token } = useSelector((state) => state.user);
-  console.log("token ,name", token, name);
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [signInLoading, setSignInLoading] = useState(false);
   const dispatch = useDispatch();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    let findToken = localStorage.getItem("token");
+    let findUser = localStorage.getItem("user");
+    if (findToken && findUser) {
+      const { preference, username } = JSON.parse(findUser);
+      dispatch(setColor(preference)); // Change background color to green on success
+      dispatch(setToken(findToken)); // Update token
+      dispatch(setName(username)); // Update Username
+    }
+  }, []);
+
+  useEffect(() => {
     document.body.style.backgroundColor = color;
   }, [color]);
 
@@ -86,6 +90,8 @@ const Home = () => {
         dispatch(setColor(preference)); // Change background color to green on success
         dispatch(setToken(token)); // Update token
         dispatch(setName(username)); // Update Username
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify({ preference, username }));
       } else {
         const errorText = data.message;
         setError(errorText);

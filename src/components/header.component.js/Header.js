@@ -4,9 +4,10 @@ import toast, { Toaster } from "react-hot-toast";
 
 import { Link } from "react-router-dom";
 import "./header.css"; // Import the CSS file
-import { remToken, setColor } from "../../redux/actions";
+import { remToken, setColor, setName } from "../../redux/actions";
 import axios from "axios";
 import { API_BASE_URL } from "../../environment";
+import { colorTemp, defaultUsername } from "../../config/config";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,13 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(remToken());
+    localStorage.clear();
+    let defaultColor = Object.keys(colorTemp)[0];
+    toast.success(
+      `Logout Success!!!, default theme color updated to ${colorTemp[defaultColor]}`
+    );
+    dispatch(setColor(defaultColor));
+    dispatch(setName(defaultUsername));
   };
 
   const handleThemeChange = async () => {
@@ -26,7 +34,9 @@ const Header = () => {
     if (!token) {
       return toast.error("Login to update color preference");
     }
-    let promptResp = window.confirm("Are you sure to change your theme?");
+    let promptResp = window.confirm(
+      `Are you sure to change your theme color to (${colorTemp[value]})`
+    );
     console.log("promptResp", promptResp);
     if (promptResp) {
       const { data } = await axios.put(
@@ -44,6 +54,10 @@ const Header = () => {
         }
       );
       if (data && data.status == 200) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ preference: value, username: name })
+        );
         toast.success("Theme updated success, re-login to check");
       } else {
         toast.error(`Theme updation failed, ${data.message}`);
